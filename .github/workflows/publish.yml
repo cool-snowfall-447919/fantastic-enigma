@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: 'cool-snowfall'
+          workload_identity_provider: 'projects/161894084213/locations/global/workloadIdentityPools/github/providers/my-repo'
+
+      - shell: bash
+        env:
+          my_tag: us-central1-docker.pkg.dev/cool-snowfall/alpine-test/test:1
+        run: |
+          gcloud auth configure-docker \
+            us-central1-docker.pkg.dev
+          docker pull alpine
+          docker tag alpine $my_tag
+          docker push $my_tag
+      
